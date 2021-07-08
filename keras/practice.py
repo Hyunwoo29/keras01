@@ -1,21 +1,15 @@
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
 import numpy as np
 
-# 데이터
-x = np.array([1,2,3,4,5])
-y = np.array([1,2,4,3,5])
+# x = np.array([[10,2], [3, 4]])
+# y = np.array([[4,5],[6,7]])
+# result = np.dot(x, y)
 
-# 모델구성
-model = Sequential()
-model.add(Dense(1, input_dim=1))
 
-# 컴파일,훈련
-model.compile(loss='mse', optimizer='adam')
-model.fit(x,y,epochs=1000, batch_size=1)
-# 평가,예측
-loss = model.evaluate(x, y)
-print("loss : ", loss)
+# 과제1 --> a4용지에 행렬 배운거 숫자 바꿔서 사진 찍어서 제출
+# [1,2,3]
+# [[1,2,3]] -> 1,3
+# [[[1],[2]], [[3],[4]]]
 
-x_pred = model.predict([6])
-print("6의 예측값 : ",  x_pred)
+# a = np.arange((1,11),(1,11)).reshape(2,10)
+# print(a)
+# print(a.T)
