@@ -24,7 +24,10 @@ x_train, x_test, y_train, y_test = train_test_split(x, y,
                                                     train_size=0.7,
                                                     shuffle=True,
                                                     random_state=66)
-
+x_train, x_val, y_train, y_val = train_test_split(x_train, y_train,
+                                                    train_size=0.8,
+                                                    shuffle=True,
+                                                    random_state=66)
 optimizers = ['adam']
 activations = ['elu', 'selu', 'relu']
 
@@ -43,13 +46,13 @@ for i in range(len(optimizers)) :
         model.add(Dense(64,activation=activations[j], input_dim = 13))
         model.add(Dense(128,activation=activations[j]))
         model.add(Dense(128,activation=activations[j]))
-        model.add(Dropout(0.1*i))
+        model.add(Dropout(0.1))
         model.add(Dense(128,activation=activations[j]))
         model.add(Dense(256,activation=activations[j]))
         model.add(Dense(256,activation=activations[j]))
         model.add(Dense(1))
         model.compile(loss = 'mae', optimizer=optimizers[i])
-        model.fit(x_train, y_train, epochs = 200, batch_size= 16)
+        model.fit(x_train, y_train, epochs = 200, batch_size= 16, validation_data=(x_val, y_val))
 
         loss = model.evaluate(x_test,y_test)
 

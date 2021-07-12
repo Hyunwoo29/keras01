@@ -1,40 +1,56 @@
+from operator import index
+from keras import optimizers
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 import numpy as np
-import random
-# 데이터
+from tensorflow.python.keras import activations
+
 x = np.array([1,2,3,4,5])
 y = np.array([1,2,4,3,5])
 
+optimizers = ['adam']
+activations = ['elu', 'selu', 'relu']
 
-# print(x_test)
-# print(y_test)
+r2score = []
+opt = []
+act = []
+y_pred = []
 
-# 모델구성
 model = Sequential()
-model.add(Dense(1, input_dim=1))
-model.add(Dense(10))
-model.add(Dense(8))
-model.add(Dense(4))
-model.add(Dense(1))
+for i in range(len(optimizers)) :
+    for j in range(len(activations)) :
+        model.add(Dense(100, input_dim = 1))
+        model.add(Dense((1+i)*20))
+        model.add(Dense((1+i)*10,activation=activations[j]))
+        model.add(Dense((1+i)*5,activation=activations[j]))
+        model.add(Dense(1))
+        model.compile(loss = 'mse', optimizer=optimizers[i])
+        model.fit(x,y,epochs=1000, batch_size=128)
 
-# 컴파일, 훈련
-model.compile(loss='mse', optimizer='adam')
-model.fit(x, y, epochs=1050, batch_size=1)
+        loss = model.evaluate(x,y)
 
-# 평가,예측
-loss = model.evaluate(x, y)
-print('loss : ', loss)
+        y_predict = model.predict(x)
+        y_pred.append(y_predict)
 
-y_predict = model.predict(x)
-print('x의 예측값 :', y_predict)
+        from sklearn.metrics import r2_score
+        r2 = r2_score(y,y_predict)
+        r2score.append(r2)
+        opt.append(optimizers[i])
+        act.append(activations[j])
 
-# 완성한뒤, 출력결과 스샷
+index = r2score.index(max(r2score))
+print("x의값 : ", y_pred[index])
+print("r2score : ", r2score[index])
 
-from sklearn.metrics import r2_score
-r2 = r2_score(y, y_predict)
+'''
+x의값 :  [[1.0000002]
+ [2.0000007]
+ [3.9999957]
+ [3.0000012]
+ [5.000002 ]]
+r2score :  0.9999999999975955
+'''
 
-print("r2스코어 : ", r2)
 
 # 과제 2
 # R2를 심수안씨를 이겨라!!

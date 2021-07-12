@@ -41,3 +41,12 @@ for i in range(len(optimizers)) :
 index = r2score.index(max(r2score))
 print("x의값 : ", y_pred[index])
 print("r2score : ", r2score[index])
+
+'''
+x의값 :  [[1.0000002]
+ [2.0000007]
+ [3.9999957]
+ [3.0000012]
+ [5.000002 ]]
+r2score :  0.9999999999975955
+'''
