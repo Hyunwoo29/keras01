@@ -49,7 +49,7 @@ for i in range(len(optimizers)) :
         model.add(Dense(256,activation=activations[j]))
         model.add(Dense(1))
         model.compile(loss = 'mae', optimizer=optimizers[i])
-        model.fit(x_train, y_train, epochs = 200, batch_size= 16)
+        model.fit(x_train, y_train, epochs = 1000, batch_size= 16)
 
         loss = model.evaluate(x_test,y_test)
 
@@ -68,3 +68,6 @@ index = r2score.index(max(r2score))
 print("x의값 : ", y_pred[index])
 print("best optimizer : ",opt[index],", best activation : ",act[index],", r2score : ", r2score[index])
 
+# r2score :  0.8144539732699316
+#  r2score :  0.8243615325835015
+# r2score :  0.8307976724104797
