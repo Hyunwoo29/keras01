@@ -67,7 +67,7 @@ model = Model(inputs=(input1), outputs=[last_output1, last_output2])
  
 model.summary()
 
-#3. 컴파일, 훈련
+# 3. 컴파일, 훈련
 model.compile(loss = 'mse', optimizer='adam', metrics=['mae'])
 model.fit(x1_train, [y1_train, y2_train], epochs=100, batch_size=8, verbose=1)
 
