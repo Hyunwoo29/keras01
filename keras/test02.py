@@ -14,7 +14,7 @@ datasets1 = pd.read_csv('./_data/SK주가 20210721.csv', sep=',', index_col=0, h
 datasets = datasets.sort_values(by='일자')
 datasets1 = datasets1.sort_values(by='일자')
 datasets.drop(['Unnamed: 15'], axis = 1, inplace = True) # Unnamed: 15 라는 열 제거 
-datasets1.drop(['Unnamed: 15'], axis = 1, inplace = True) # Unnamed: 15 라는 열 제거
+datasets1.drop(['Unnamed: 15'], axis = 1, inplace = True) # Unnamed: 15 라는 열 제거z
 datasets= datasets.dropna(axis=0)
 datasets1= datasets1.dropna(axis=0)
 
@@ -23,40 +23,84 @@ datasets1= datasets1.dropna(axis=0)
 # print(datasets.info()) # dtypes: float64(5), object(9)
 # print(datasets.isnull().sum()) # Unnamed: 15    3601
 # print(datasets1.isnull().sum()) # Unnamed: 15    3601
+samsung_df = pd.DataFrame(datasets)
+sk_df = pd.DataFrame(datasets1)
 
-datasets.drop(['종가 단순 5', '10', '20', '60', '120', '단순 5', '20.1', '60.1', '120.1'], axis='columns', inplace=True)
-datasets1.drop(['종가 단순 5', '10', '20', '60', '120', '단순 5', '20.1', '60.1', '120.1'], axis='columns', inplace=True)
+samsung = samsung_df[['시가','고가','저가','거래량','종가']]   # 열 추출
+sk = sk_df[['시가','고가','저가','거래량','종가']]
 
-datasets = datasets.to_numpy()
-datasets1 = datasets1.to_numpy()
+samsung = samsung.to_numpy()
+sk = sk.to_numpy()
 
+# print(samsung.shape) (3600, 5)
 
 size = 5
-def split_x(datasets, size):
+def split_x(dataset, size):
     aaa = []
-    for i in range(len(datasets) - size + 1):
-        subset = datasets[i : (i + size),:]
+    for i in range(len(dataset) - size + 1):
+        subset = dataset[i : (i + size),:]
         aaa.append(subset)
     return np.array(aaa)
 
-dataset = split_x(datasets, size)
-predset = split_x(datasets1,size)
-print(dataset.shape, predset.shape)
+x_samsung = split_x(samsung, size)#(3596, 5, 5)
+x_sk = split_x(sk, size)
+x_samsung_pred = x_samsung[-1, :] #(5, 5)
+x_sk_pred = x_sk[-1, :]
+y_samsung = samsung[4:,4] # (3596,)
+x_samsung = x_samsung.reshape(3596, 25)
+x_sk = x_sk.reshape(3596,25)
+y_samsung = y_samsung.reshape(-1, 1)                     
+x_samsung_pred = x_samsung_pred.reshape(1,25)
+x_sk_pred = x_sk_pred.reshape(1,25)
 
-# scaler = MinMaxScaler()
-# data1 = datasets.iloc[:, :-1]
-# data2 = datasets.iloc[:, -1:]
-# data1 = scaler.fit_transform(data1)
-# data2 = scaler.fit_transform(data2)
-# dataset = np.concatenate((data1, data2), axis=1)
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(x_samsung, y_samsung, shuffle=False, train_size=0.8)
+x1_train, x1_test, y1_train, y1_test = train_test_split(x_sk, y_samsung, shuffle=False, train_size=0.8)
 
-# scaler = MinMaxScaler()
-# data_1 = datasets1.iloc[:, :-1]
-# data_2 = datasets1.iloc[:,-1:]
-# data_1 = scaler.fit_transform(data_1)
-# data_2 = scaler.fit_transform(data_2)
-# dataset1 = np.concatenate((data_1, data_2), axis=1)
-# print(dataset.shape, dataset1.shape) # (3600, 5) (3600, 5)
+scaler = MinMaxScaler()
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+x_samsung_pred = scaler.transform(x_samsung_pred)
+x_sk_pred = scaler.transform(x_sk_pred)
+x1_train = scaler.fit_transform(x1_train)
+x1_test = scaler.transform(x1_test)
+
+x_train = x_train.reshape(x_train.shape[0], 5, 5) 
+x_test = x_test.reshape(x_test.shape[0], 5, 5)
+x_samsung_pred = x_samsung_pred.reshape(x_samsung_pred.shape[0], 5, 5)
+x_sk_pred = x_sk_pred.reshape(x_sk_pred.shape[0], 5, 5)
+x1_train = x1_train.reshape(x1_train.shape[0], 5, 5)
+x1_test = x1_test.reshape(x1_test.shape[0], 5, 5)
 
 
+input1 = Input(shape=(5, 5))
+lstm = LSTM(128, activation='relu', return_sequences=True)(input1)
+conv = Conv1D(64, 2, activation='relu')(lstm)
+flat = Flatten()(conv)
+dense = Dense(48)(flat)
+dense = Dense(32)(dense)
+output1 = Dense(1)(dense)
+# 모델2 - sk
+input2 = Input(shape=(5, 5))
+lstm = LSTM(128, activation='relu', return_sequences=True)(input2)
+conv = Conv1D(64, 2, activation='relu')(lstm)
+flat = Flatten()(conv)
+dense = Dense(32)(flat)
+dense = Dense(16)(dense)
+output2 = Dense(1)(dense)
+from tensorflow.keras.layers import concatenate
+merge1 = concatenate([output1, output2])
+merge2 = Dense(10, activation='relu')(merge1)
+merge3 = Dense(10, activation='relu')(merge2)
+last_output = Dense(1)(merge3)
+model = Model(inputs=[input1, input2], outputs=last_output)
 
+
+model.compile(loss='mse', optimizer='adam')
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+es = EarlyStopping(monitor='val_loss', mode='min', patience=5, verbose=1, restore_best_weights=True)
+model.fit([x_train, x_train], [y_train,y1_train], epochs=1000, batch_size=50, validation_split=0.02, callbacks=[es])
+results = model.evaluate([x_test, x1_test], [y_test, y1_test])
+print('loss :', results)
+y_predict = model.predict([x_samsung_pred, x_sk_pred])
+print(y_predict)
