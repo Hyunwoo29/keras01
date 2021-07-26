@@ -60,43 +60,43 @@ y = y.to_numpy()
 print(samsung_1.shape, y.shape)
 
 
-# size = 5
+size = 5
 
-# def split_x(samsung_1, size):
-#     aaa = []
-#     for i in range(len(samsung_1) - size + 1):  # 10 - 5 + 1 = 6행 // 행의 개수가 정해짐
-#         subset = samsung_1[i : (i + size), :]
-#         aaa.append(subset)
-#     return np.array(aaa)
+def split_x(samsung_1, size):
+    aaa = []
+    for i in range(len(samsung_1) - size + 1):  # 10 - 5 + 1 = 6행 // 행의 개수가 정해짐
+        subset = samsung_1[i : (i + size), :]
+        aaa.append(subset)
+    return np.array(aaa)
 
-# size1 = 1
-# def split_y(y, size1):
-#     aa = []
-#     for i in range(len(y) - size1 + 1):  # 10 - 5 + 1 = 6행 // 행의 개수가 정해짐
-#         subset = y[i : (i + size1)]
-#         aa.append(subset)
-#     return np.array(aa)
+size1 = 1
+def split_y(y, size1):
+    aa = []
+    for i in range(len(y) - size1 + 1):  # 10 - 5 + 1 = 6행 // 행의 개수가 정해짐
+        subset = y[i : (i + size1)]
+        aa.append(subset)
+    return np.array(aa)
 
-# def split_x1(sk_1, size):
-#     a = []
-#     for i in range(len(sk_1) - size + 1):  # 10 - 5 + 1 = 6행 // 행의 개수가 정해짐
-#         subset = sk_1[i : (i + size), :]
-#         a.append(subset)
-#     return np.array(a)
+def split_x1(sk_1, size):
+    a = []
+    for i in range(len(sk_1) - size + 1):  # 10 - 5 + 1 = 6행 // 행의 개수가 정해짐
+        subset = sk_1[i : (i + size), :]
+        a.append(subset)
+    return np.array(a)
 
-# samsung = split_x(samsung_1, size)
-# sk = split_x1(sk_1, size)
-# y = split_y(y, size1)
+samsung = split_x(samsung_1, size)
+sk = split_x1(sk_1, size)
+y = split_y(y, size1)
 
-# # print(samsung.shape, sk.shape, y.shape)  # (3596, 5, 5) (3596, 5, 5) (3594, 1)
-# y = np.array(y)
-# print(y.shape)
+# print(samsung.shape, sk.shape, y.shape)  # (3596, 5, 5) (3596, 5, 5) (3594, 1)
+y = np.array(y)
+print(y.shape)
 
-# x_train, x_test, x1_train, x1_test, y_train, y_test = train_test_split(samsung, sk, y, test_size=0.2, random_state=60)
-# # # x_train = x_train.reshape(x_train.shape[0], 5, 5)
-# # # x_test = x_test.reshape(x_test.shape[0], 5, 5)
-# # # x1_train = x1_train.reshape(x1_train.shape[0], 5, 5)
-# # # x1_test = x1_test.reshape(x1_test.shape[0], 5, 5)
-# # # y_test = y_test.reshape(y_test.shape[0], 1, 1)
+x_train, x_test, x1_train, x1_test, y_train, y_test = train_test_split(samsung, sk, y, test_size=0.2, random_state=60)
+# # x_train = x_train.reshape(x_train.shape[0], 5, 5)
+# # x_test = x_test.reshape(x_test.shape[0], 5, 5)
+# # x1_train = x1_train.reshape(x1_train.shape[0], 5, 5)
+# # x1_test = x1_test.reshape(x1_test.shape[0], 5, 5)
+# # y_test = y_test.reshape(y_test.shape[0], 1, 1)
 
 # print(y_train.shape)
