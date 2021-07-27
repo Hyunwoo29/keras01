@@ -40,15 +40,29 @@ print(x_train.shape, x_test.shape) # (8982, 100) (8982, 100)
 print(type(x_train), type(x_train[0])) # <class 'numpy.ndarray'> <class 'numpy.ndarray'>
 print(x_train[0])
 #y 확인
-print(np.unique(y_train))
+print(np.unique(y_train)) # 중복된 값들을 제거하고 나열
 
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
-print(y_train.shape, y_test.shape)
+print(y_train.shape, y_test.shape) # (8982, 46) (2246, 46)
 
 #모델구성
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Embedding
 
 model = Sequential()
-model.add(Embedding(input_dim=10000, output_dim=66, input_length=100))
+model.add(Embedding(input_dim=10000, output_dim=77, input_length=100))
+model.add(LSTM(100, activation='relu'))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(16, activation='relu'))
+model.add(Dense(46, activation='softmax'))
+
+from tensorflow.keras.callbacks import EarlyStopping
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=4)
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['acc'])
+
+history = model.fit(x_train, y_train, batch_size=256, epochs=30, callbacks=[es], validation_split=0.2)
+loss = model.evaluate(x_test, y_test)
+
+print('loss = ', loss[0])
+print('acc = ', loss[1])
