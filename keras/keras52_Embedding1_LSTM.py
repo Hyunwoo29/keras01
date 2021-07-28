@@ -57,7 +57,7 @@ print(pad_x.shape) # (13, 5)  --> 원핫인코딩하면 (13, 5) -> (13, 5, 27)
 #  [ 1 24  0  0  0]
 #  [25  3 26 27  0]]
 word_size = len(token.word_index)
-print(word_size)
+print(word_size)  # 27
 print(np.unique(pad_x))
 
 from tensorflow.keras.models import Sequential

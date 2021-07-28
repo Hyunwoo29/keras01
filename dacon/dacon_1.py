@@ -40,7 +40,10 @@ y = to_categorical(y)
 
 # x, y train_test_split
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=66)
-
+np.save('./_save/_npy/dacon_x_train.npy', arr=x_train)
+np.save('./_save/_npy/dacon_y_train.npy', arr=y_train)
+np.save('./_save/_npy/dacon_x_test.npy', arr=x_test)
+np.save('./_save/_npy/daconk_y_test.npy', arr=y_test)
 #2. Modeling
 input = Input((100, ))
 a = Embedding(101082, 8)(input)
