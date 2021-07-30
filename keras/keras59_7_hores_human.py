@@ -15,20 +15,20 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 #     zoom_range=1.2,
 #     shear_range=7,
 #     fill_mode='nearest', # nearest: 근접   근접일시 어느정도 매칭을 시켜라
-#     validation_split=.2,
+#     validation_split=.2
 # )
 # test_datagen = ImageDataGenerator(rescale=1./255)
 
 
 # xy_train = train_datagen.flow_from_directory(
-#     './_data/rps',
+#     './_data/hores_human',
 #     target_size=(300, 300),
 #     batch_size=3000,
 #     class_mode='categorical',
 #     subset='training'
 # )
 # xy_test = train_datagen.flow_from_directory(
-#     './_data/rps',
+#     './_data/hores_human',
 #     target_size=(300, 300),
 #     batch_size=1000,
 #     class_mode='categorical',
