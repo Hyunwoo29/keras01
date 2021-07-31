@@ -1,3 +1,4 @@
+from icecream import ic
 import time
 import datetime
 import numpy as np
@@ -14,3 +15,5 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 datasets_train = pd.read_csv('./_data/train_data.csv')
 datasets_test = pd.read_csv('./_data/test_data.csv')
+
+ic(datasets_train)

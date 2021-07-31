@@ -69,7 +69,7 @@ input1 = Input(shape=(5,)) # Input(shape=(None,)) 이렇게 넣어줘도 가능�
 dense1 = Embedding(input_dim=28, output_dim=77)(input1)
 dense2 = LSTM(4)(dense1)
 dense3 = Dense(10, activation='relu')(dense2)
-output1 = Dense(2)(dense3)
+output1 = Dense(1)(dense3)
 
 model = Model(inputs=input1, outputs=output1)
 
