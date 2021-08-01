@@ -50,4 +50,3 @@ def to_one_hot(labels, dimension=46):
 one_hot_train_lables = to_one_hot(train_labels)
 one_hot_test_labels = to_one_hot(test_labels)
 
-ic(one_hot_train_lables)
