@@ -15,6 +15,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from tensorflow.keras.utils import plot_model, to_categorical
 
+# 경고메세지 끄기
 import warnings 
 warnings.filterwarnings(action='ignore')
 
@@ -59,8 +60,8 @@ sequences_test = tokenizer.texts_to_sequences(X_test)
 word_index = tokenizer.word_index
 
 max_length = 14
-padding_type='post'
-train_x = pad_sequences(sequences_train, padding='post', maxlen=max_length)
+padding_type='pre'
+train_x = pad_sequences(sequences_train, padding='pre', maxlen=max_length)
 test_x = pad_sequences(sequences_test, padding=padding_type, maxlen=max_length)
 # print(train_x.shape, test_x.shape) # (45654, 14) (9131, 14)
 
@@ -81,7 +82,7 @@ train_y = to_categorical(Y_train) # Y_train 원핫 인코딩
 vocab_size = 2000 # 제일 많이 사용하는 사이즈
 embedding_dim = 200  
 max_length = 14    # 위에서 그래프 확인 후 정함
-padding_type='post'
+padding_type='pre'
 
 model3 = Sequential([Embedding(vocab_size, embedding_dim, input_length =max_length),
         tf.keras.layers.Bidirectional(LSTM(units = 64, return_sequences = True)),
@@ -98,19 +99,52 @@ model3.compile(loss= 'categorical_crossentropy', #여러개 정답 중 하나 �
 
 history = model3.fit(train_x, train_y, epochs=10, batch_size=100, validation_split= 0.2)
 
-plt.figure(figsize=(12, 4))
+# plt.figure(figsize=(12, 4))
 
-plt.subplot(1, 2, 1)
-plt.title('loss of Bidirectional LSTM (model3) ', fontsize= 15)
-plt.plot(history.history['loss'], 'b-', label='loss')
-plt.plot(history.history['val_loss'],'r--', label='val_loss')
-plt.xlabel('Epoch')
-plt.legend()
+# plt.subplot(1, 2, 1)
+# plt.title('loss of Bidirectional LSTM (model3) ', fontsize= 15)
+# plt.plot(history.history['loss'], 'b-', label='loss')
+# plt.plot(history.history['val_loss'],'r--', label='val_loss')
+# plt.xlabel('Epoch')
+# plt.legend()
 
-plt.subplot(1, 2, 2)
-plt.title('accuracy of Bidirectional LSTM (model3) ', fontsize= 15)
-plt.plot(history.history['accuracy'], 'g-', label='accuracy')
-plt.plot(history.history['val_accuracy'],'k--', label='val_accuracy')
-plt.xlabel('Epoch')
-plt.legend()
-plt.show()
+# plt.subplot(1, 2, 2)
+# plt.title('accuracy of Bidirectional LSTM (model3) ', fontsize= 15)
+# plt.plot(history.history['accuracy'], 'g-', label='accuracy')
+# plt.plot(history.history['val_accuracy'],'k--', label='val_accuracy')
+# plt.xlabel('Epoch')
+# plt.legend()
+# plt.show()
+
+
+# 계층 교차 검증
+n_fold = 5  
+seed = 42
+
+cv = StratifiedKFold(n_splits = n_fold, shuffle=True, random_state=seed)
+
+# 테스트데이터의 예측값 담을 곳 생성
+test_y = np.zeros((test_x.shape[0], 7))
+
+# 조기 종료 옵션 추가
+es = EarlyStopping(monitor='val_loss', min_delta=0.001, patience=3,
+                   verbose=1, mode='min', baseline=None, restore_best_weights=True)
+
+for i, (i_trn, i_val) in enumerate(cv.split(train_x, Y_train), 1):
+    print(f'training model for CV #{i}')
+
+    model3.fit(train_x[i_trn], 
+            to_categorical(Y_train[i_trn]),
+            validation_data=(train_x[i_val], to_categorical(Y_train[i_val])),
+            epochs=10,
+            batch_size=512,
+            callbacks=[es])     # 조기 종료 옵션
+                      
+    test_y += model3.predict(test_x) / n_fold  
+
+topic = []
+for i in range(len(test_y)):
+    topic.append(np.argmax(test_y[i]))
+
+submission['topic_idx'] = topic
+submission.to_csv(PATH + 'LSTM.csv',index = False)

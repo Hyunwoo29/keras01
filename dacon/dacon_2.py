@@ -90,7 +90,7 @@ from tensorflow.keras.layers import Dense, Embedding, LSTM, GRU, Bidirectional
 
 # model = Model(inputs=input, outputs=output)
 model = Sequential()
-model.add(Embedding(input_dim=101082, output_dim=130, input_length=13)) # 예시1  #length는 왠만하면 max length 길이에 맞춰줘라
+model.add(Embedding(input_dim=101082, output_dim=77, input_length=13)) # 예시1  #length는 왠만하면 max length 길이에 맞춰줘라
 # model.add(Embedding(27, 77))  # 예시2  # 인풋 27, 아웃풋 77
 # model.add(Embedding(27, 77, input_length=5)) #예시3
 # Embedding은  예시1과 예시2 두개중 하나로 표현 가능하다. 예시3도 가능은하다.
@@ -115,6 +115,7 @@ model.add(Embedding(input_dim=101082, output_dim=130, input_length=13)) # 예시
 
 model.add(LSTM(128, activation='relu'))
 model.add(Dense(64, activation= 'relu'))
+model.add(Dropout(0.2))
 model.add(Dense(32, activation= 'relu'))
 model.add(Dense(7, activation='softmax'))
 
@@ -125,10 +126,10 @@ date_time = date.strftime('%m%d_%H%M')
 path = './_save/mcp/'
 info = '{epoch:02d}_{val_loss:.4f}'
 filepath = ''.join([path, 'test', '_', date_time, '_', info, '.hdf5'])
-es = EarlyStopping(monitor='val_loss', restore_best_weights=False, mode='auto', verbose=1, patience=5)
-cp = ModelCheckpoint(monitor='val_loss', save_best_only=True, mode='auto', verbose=1, filepath=filepath)
+es = EarlyStopping(monitor='val_loss', restore_best_weights=True, mode='min', verbose=1, patience=10)
+cp = ModelCheckpoint(monitor='val_loss', save_best_only=True, mode='min', verbose=1, filepath=filepath)
 start_time = time.time()
-model.fit(x_train, y_train, epochs=100, batch_size=300, verbose=1, validation_split=0.2, callbacks=[es, cp])
+model.fit(x_train, y_train, epochs=100, batch_size=100, verbose=1, validation_split=0.02, callbacks=[es, cp])
 end_time = time.time() - start_time
 
 #4. Evaluating
@@ -167,3 +168,7 @@ file.to_csv('./_data/sample_submission.csv', header=['index', 'topic_idx'], inde
 # ic| 'loss = ', loss[0]: 1.1994911432266235
 # ic| 'acc = ', loss[1]: 0.7506023049354553
 # ic| 'time taken(s) = ', end_time: 337.4024827480316
+
+# ic| 'loss = ', loss[0]: 0.741577684879303
+# ic| 'acc = ', loss[1]: 0.7534496784210205
+# ic| 'time taken(s) = ', end_time: 211.66828107833862
