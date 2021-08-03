@@ -87,10 +87,13 @@ from tensorflow.keras.layers import Dense, Embedding, LSTM, GRU, Bidirectional
 
 model = Sequential()
 model.add(Embedding(input_dim=101082, output_dim=77, input_length=11))
-model.add(LSTM(128, activation='relu'))
+model.add(LSTM(128, activation='relu', return_sequences=True))
+model.add(Dropout(0.2))
+model.add(LSTM(64, activation='relu'))
 model.add(Dense(64, activation= 'relu'))
 model.add(Dropout(0.2))
 model.add(Dense(32, activation= 'relu'))
+model.add(Dropout(0.2))
 model.add(Dense(7, activation='softmax'))
 
 
@@ -104,7 +107,7 @@ filepath = ''.join([path, 'test', '_', date_time, '_', info, '.hdf5'])
 es = EarlyStopping(monitor='val_loss', restore_best_weights=True, mode='min', verbose=1, patience=10)
 cp = ModelCheckpoint(monitor='val_loss', save_best_only=True, mode='min', verbose=1, filepath=filepath)
 start_time = time.time()
-model.fit(x_train, y_train, epochs=100, batch_size=100, verbose=1, validation_split=0.02, callbacks=[es, cp])
+model.fit(x_train, y_train, epochs=100, batch_size=512, verbose=1, validation_split=0.02, callbacks=[es, cp])
 end_time = time.time() - start_time
 
 #4. Evaluating
@@ -112,6 +115,7 @@ loss = model.evaluate(x_test, y_test)
 
 ic('loss = ', loss[0])
 ic('acc = ', loss[1])
+ic('acc = ', loss[-1])
 ic('time taken(s) = ', end_time)
 
 

@@ -59,9 +59,9 @@ tokenizer.fit_on_texts(x)
 sequences_train = tokenizer.texts_to_sequences(x)
 sequences_test = tokenizer.texts_to_sequences(x_predict)
 
-#리스트 형태의 빈값 제거
-sequences_train = list(filter(None, sequences_train))
-sequences_test = list(filter(None, sequences_test))
+#리스트 형태의 빈값 제거  --> 양방향에서는 오류남..
+# sequences_train = list(filter(None, sequences_train))
+# sequences_test = list(filter(None, sequences_test))
 
 #길이 확인
 # x1_len = max(len(i) for i in sequences_train)
@@ -69,19 +69,19 @@ sequences_test = list(filter(None, sequences_test))
 # x_pred = max(len(i) for i in sequences_test)
 # ic(x_pred) # ic| x_pred: 9
 
-xx = pad_sequences(sequences_train, padding='pre', maxlen = 11)
+xx = pad_sequences(sequences_train, padding='pre', maxlen = 14)
 # ic(xx.shape) ic| xx.shape: (42477, 11)
-yy = pad_sequences(sequences_test, padding='pre', maxlen=11)
+yy = pad_sequences(sequences_test, padding='pre', maxlen=14)
 
 y = to_categorical(y_train)
 
 from sklearn.model_selection import train_test_split
 
-x_train, x_test, y_train, y_test = train_test_split(xx, y, train_size=0.7, shuffle=True, random_state=66)
-np.save('./_save/_npy/dacon_x_train2.npy', arr=x_train)
-np.save('./_save/_npy/dacon_y_train2.npy', arr=y_train)
-np.save('./_save/_npy/dacon_x_test2.npy', arr=x_test)
-np.save('./_save/_npy/dacon_y_test2.npy', arr=y_test)
+# x_train, x_test, y_train, y_test = train_test_split(xx, y, train_size=0.7, shuffle=True, random_state=66)
+# np.save('./_save/_npy/dacon_x_train2.npy', arr=x_train)
+# np.save('./_save/_npy/dacon_y_train2.npy', arr=y_train)
+# np.save('./_save/_npy/dacon_x_test2.npy', arr=x_test)
+# np.save('./_save/_npy/dacon_y_test2.npy', arr=y_test)
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Embedding, LSTM, GRU, Bidirectional
 
@@ -92,10 +92,12 @@ from tensorflow.keras.layers import Dense, Embedding, LSTM, GRU, Bidirectional
 # model.add(Dropout(0.2))
 # model.add(Dense(32, activation= 'relu'))
 # model.add(Dense(7, activation='softmax'))
-model = Sequential([Embedding(101082, 200, input_length =11),
-        tf.keras.layers.Bidirectional(LSTM(units = 64, return_sequences = True)),
-        tf.keras.layers.Bidirectional(LSTM(units = 64, return_sequences = True)),
-        tf.keras.layers.Bidirectional(LSTM(units = 64)),
+model = Sequential([Embedding(101082, 200, input_length =14),
+        tf.keras.layers.Bidirectional(LSTM(units = 32, return_sequences = True, activation='relu')),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Bidirectional(LSTM(units = 16, return_sequences = True, activation='relu')),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Bidirectional(LSTM(units = 8, activation='relu')),
         Dense(7, activation='softmax')    # 결과값이 0~4 이므로 Dense(5)
     ])
 import datetime
@@ -111,7 +113,7 @@ path = './_save/mcp/'
 info = '{epoch:02d}_{val_loss:.4f}'
 filepath = ''.join([path, 'test', '_', date_time, '_', info, '.hdf5'])
 
-history = model.fit(x_train, y_train, epochs=100, batch_size=32, validation_split= 0.2)
+history = model.fit(xx, y, epochs=10, batch_size=512, validation_split= 0.2)
 
 
 
@@ -121,38 +123,41 @@ seed = 66
 cv = StratifiedKFold(n_splits = n_fold, shuffle=True, random_state=seed)
 
 # 테스트데이터의 예측값 담을 곳 생성
-test_y = np.zeros((x_test.shape[0], 7))
+test_y = np.zeros((yy.shape[0], 7))
 
 # 조기 종료 옵션 추가
 es = EarlyStopping(monitor='val_loss', min_delta=0.001, patience=5,
                    verbose=1, mode='min', baseline=None, restore_best_weights=True)
 cp = ModelCheckpoint(monitor='val_loss', save_best_only=True, mode='auto', verbose=1, filepath=filepath)
 start_time = time.time()
-for i, (i_trn, i_val) in enumerate(cv.split(x_train, y_train), 1):
+for i, (i_trn, i_val) in enumerate(cv.split(xx, y_train), 1):
     print(f'training model for CV #{i}')
 
-    model.fit(x_train[i_trn], 
+    model.fit(xx[i_trn], 
             to_categorical(y_train[i_trn]),
-            validation_data=(x_train[i_val], to_categorical(y_train[i_val])),
-            epochs=100,
-            batch_size=124,
+            validation_data=(xx[i_val], to_categorical(y_train[i_val])),
+            epochs=5,
+            batch_size=512,
             callbacks=[es,cp])     # 조기 종료 옵션
                       
-    test_y += model.predict(x_test) / n_fold  
+    test_y += model.predict(yy) / n_fold  
 
 topic = []
 for i in range(len(test_y)):
     topic.append(np.argmax(test_y[i]))
 end_time = time.time() - start_time
-loss = model.evaluate(x_test, y_test)
-ic('loss = ', loss[0])
-ic('acc = ', loss[1])
-ic('val_acc = ', loss[-1])
-ic('time taken(s) = ', end_time)
+# loss = model.evaluate(x_test, y_test)
+# ic('loss = ', loss[0])
+# ic('acc = ', loss[1])
+# ic('val_acc = ', loss[-1])
+# ic('time taken(s) = ', end_time)
 
 submission['topic_idx'] = topic
-submission.to_csv(PATH + 'LSTM1.csv',index = False)
+submission.to_csv(PATH + 'LSTM3.csv',index = False)
 
 # ic| 'loss = ', loss[0]: 0.7068963646888733
 # ic| 'acc = ', loss[1]: 0.7655690908432007
 # ic| 'time taken(s) = ', end_time: 190.59102249145508
+
+# Epoch 5/5
+# 72/72 [==============================] - 17s 237ms/step - loss: 4.0520e-04 - accuracy: 0.9999 - val_loss: 0.0023 - val_accuracy: 0.9996
