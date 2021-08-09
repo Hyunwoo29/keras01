@@ -33,6 +33,7 @@ scaler = MinMaxScaler()
 x_train = scaler.fit_transform(x_train)
 x_test = scaler.transform(x_test)
 
+# print(x_train.shape, x_test.shape) (354, 13) (152, 13)
 x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], 1)
 x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], 1)
 
@@ -41,36 +42,21 @@ x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], 1)
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Dense, Input, Conv2D, Flatten, Dropout, GlobalAveragePooling2D, MaxPool2D, LSTM, Conv1D
 
-#모델구성
-# model = Sequential()
-# model.add(Conv2D(filters=32, kernel_size=2,                          
-#                         padding='same', activation='relu', input_shape=(13, 1, 1))) 
-# model.add(Dropout(0.2))
-# model.add(Conv2D(32, 2, padding='same', activation='relu'))
-# # model.add(MaxPool2D())
-# model.add(Conv2D(64, 2, padding='same', activation='relu'))
-# model.add(Dropout(0.2))
-# model.add(Conv2D(64, 2, padding='same', activation='relu'))
-# # model.add(MaxPool2D())
-# model.add(Conv2D(128, 2, padding='same', activation='relu'))
-# model.add(Dropout(0.2))
-# model.add(Conv2D(128, 2, padding='same', activation='relu'))
-# # model.add(MaxPool2D())
-# model.add(GlobalAveragePooling2D()) # 평균내서 값을 뽑아주는것.
-# model.add(Dense(1))
+
 
 model = Sequential()
-model.add(LSTM(10, input_shape=(13,1), return_sequences=True, activation='relu'))
+model.add(LSTM(32, input_shape=(13,1), return_sequences=True, activation='relu'))
 model.add(Conv1D(32, 2, activation='relu'))
 model.add(Flatten())
+model.add(Dropout(0.2))
 model.add(Dense(16, activation='relu'))
 model.add(Dense(1))
 
 
-from tensorflow.keras.optimizers import Adam
-optimizers = Adam(lr = 0.001)
+from tensorflow.keras.optimizers import Adam, Nadam
+optimizers = Adam(lr = 0.01)
 
-model.compile(loss='mse', optimizer=optimizers, metrics=['mse'])
+model.compile(loss='mse', optimizer=optimizers)
  
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 es = EarlyStopping(monitor='val_loss', patience=10, mode='min', verbose=1)
@@ -79,19 +65,25 @@ reduce_lr = ReduceLROnPlateau(monitor='val_loss', patience=10, mode='auto', fact
 
 import time 
 start_time = time.time()
-hist = model.fit(x_train, y_train, epochs=100, batch_size=32, verbose=2,
+hist = model.fit(x_train, y_train, epochs=1000, batch_size=32, verbose=2,
     validation_split=0.02, callbacks=[es, reduce_lr])
 end_time = time.time() - start_time
 
-y_predict = model.predict([x_test])
-loss = model.evaluate(x_test, y_test)
+y_predict = model.predict(x_test)
+loss = model.evaluate(x_test, y_predict)
 
 print("time = ", end_time)
-print('lose : ', loss[0])
-print('accuracy : ', loss[1])
+# print('lose : ', loss[0])
+# print('accuracy : ', loss[1])
 r2 = r2_score(y_test, y_predict)
 print('R^2 score : ', r2)
 
 # time =  22.726332902908325
 # loss :  13.370774269104004
 # R^2 score :  0.8381597446792671
+
+# Adam = 0.01
+# time =  9.185080289840698
+# lose :  0.0
+# accuracy :  0.0
+# R^2 score :  0.3542220376917652
