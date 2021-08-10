@@ -37,7 +37,7 @@ x_test = scaler.transform(x_test)
 # print(x.shape, y.shape) # (442, 10) (442,)
 
 # print(datasets.feature_names) # ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
-# print(datasets.DESCR)
+print(datasets.DESCR)
 
 # print(y[:30])
 # print(np.min(y), np.max(y))
