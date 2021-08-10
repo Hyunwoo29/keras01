@@ -98,7 +98,7 @@ model = Sequential([Embedding(101082, 200, input_length =14),
         tf.keras.layers.Bidirectional(LSTM(units = 16, return_sequences = True, activation='relu')),
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Bidirectional(LSTM(units = 8, activation='relu')),
-        Dense(7, activation='softmax')    # 결과값이 0~4 이므로 Dense(5)
+        Dense(7, activation='softmax')    
     ])
 import datetime
 import time
