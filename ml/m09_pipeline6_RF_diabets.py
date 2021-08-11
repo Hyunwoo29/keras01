@@ -24,40 +24,34 @@ x = datasets.data
 y = datasets.target
 
 x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.7, shuffle=True, random_state=66)
+
+
 # 데이터 전처리
-from sklearn.preprocessing import MaxAbsScaler, RobustScaler, QuantileTransformer, PowerTransformer
-# scaler = MaxAbsScaler()
-# scaler = RobustScaler()
-# scaler = QuantileTransformer()
-scaler = PowerTransformer()
-scaler.fit(x_train)
-x_train = scaler.transform(x_train) # train은 훈련을 시키고, test는 훈련에 포함되면 안된다.
-x_test = scaler.transform(x_test) 
-
-# print(x.shape, y.shape) # (442, 10) (442,)
-
-# print(datasets.feature_names) # ['age', 'sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']
-print(datasets.DESCR)
-
-# print(y[:30])
-# print(np.min(y), np.max(y))
-#2. 모델구성
+from sklearn.preprocessing import MinMaxScaler,MaxAbsScaler, RobustScaler, QuantileTransformer, PowerTransformer
 
 
-
-model = LinearRegression()
-# modle.score :  0.5058546730473183
-# model = DecisionTreeRegressor()
-# modle.score :  0.005307796040650681
-# model = KNeighborsRegressor()
-# modle.score :  0.3536953490739686
-# model = RandomForestRegressor()
-# modle.score :  0.42408382262540756
+from sklearn.pipeline import make_pipeline, Pipeline
+model = make_pipeline(MinMaxScaler(), RandomForestRegressor())
 
 
+from sklearn.metrics import r2_score
 
+model.fit(x_train,y_train)
+
+import time
+start_time = time.time()
 model.fit(x_train, y_train)
 
-results = model.score(x_test, y_test) # 머신러닝에서는 evaluate 개념이 score이다.
-print("modle.score : ", results)
+# print("최적의 매개변수 : ", model.best_estimator_)
+# print("best_score : ", model.best_score_)
+# print("best_params : ", model.best_params_)
 
+print("model.score : ", model.score(x_test, y_test))
+
+y_predict = model.predict(x_test)
+print("정답률 : ", r2_score(y_test, y_predict))
+print("걸린시간 : ", time.time()- start_time)
+
+# model.score :  0.42596871005204473
+# 정답률 :  0.42596871005204473
+# 걸린시간 :  0.14062237739562988
