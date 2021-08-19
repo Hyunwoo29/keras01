@@ -1,3 +1,4 @@
+#다차원의 outlier 가 출력되도록 함수 수정
 import numpy as np
 import warnings
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning) 
@@ -23,8 +24,9 @@ def outliers(data_out):
         print('lower_bound: ', lower_bound)
         print('upper_bound: ', upper_bound)
 
-        a = np.where((data_out[:,i]>upper_bound) | (data_out[:,i]<lower_bound)) 
-        allout.append(a)
+        a = np.where((data_out[:,i]>upper_bound) | (data_out[:,i]<lower_bound))
+        aa = np.count_nonzero((data_out[:, i]>upper_bound) | (data_out[:, i]<lower_bound)) 
+        allout.append([i+1, 'col',a, 'outlier_n : ', aa])
 
     return np.array(allout)
 
