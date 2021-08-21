@@ -1,0 +1,83 @@
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.layers import Dense, Flatten,BatchNormalization, Activation, GlobalAveragePooling2D
+from tensorflow.keras.models import Sequential
+from keras.datasets import cifar100
+from keras.applications.vgg16 import preprocess_input
+from keras.optimizers import Adam
+
+import numpy as np
+
+vgg16 = VGG16(weights='imagenet', include_top=False,input_shape=(32,32,3))
+
+vgg16.trainable = True
+'''
+Total params: 14,719,879
+Trainable params: 5,191
+Non-trainable params: 14,714,688
+'''
+
+# vgg16.trainable = True
+'''
+Total params: 14,719,879
+Trainable params: 5,191
+Non-trainable params: 14,714,688
+'''
+(x_train, y_train), (x_test,y_test)= cifar100.load_data()
+
+
+# 데이터 전처리
+
+x_train = preprocess_input(x_train)
+x_test = preprocess_input(x_test)
+
+# x 같은 경우 색상의 값이기 때문에 255가 최고 값
+
+
+# OnHotEncoding (다중 분류 데이터에서 Y값을 해주는 것)
+
+from tensorflow.keras.utils import to_categorical
+y_train = to_categorical(y_train)
+y_test = to_categorical(y_test)
+
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout,LSTM,GlobalAveragePooling2D
+model = Sequential()
+model.add(vgg16)
+model.add(Conv2D(filters=1024,kernel_size=(1,1),padding='valid')) # 미세조정(파인튜닝)
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(GlobalAveragePooling2D())
+model.add(Flatten())
+model.add(Dense(128))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Dense(64))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Dense(100, activation= 'softmax'))
+model.summary()
+
+# print("그냥 가중치의 수 : ", len(model.weights))   #32 -> (weight가 있는 layer * (i(input)bias + o(output)bias))
+# print("동결 후 훈련되는 가중치의 수 : ",len(model.trainable_weights))   #6
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint,ReduceLROnPlateau
+early_stopping = EarlyStopping(monitor='val_loss', patience= 20)
+lr = ReduceLROnPlateau(factor=0.1,verbose=1,patience=10)
+
+model.compile(loss = 'categorical_crossentropy', optimizer=Adam(1e-5), metrics=['acc'])
+import time
+st = time.time()
+history =model.fit(x_train,y_train, epochs=20, batch_size=320, validation_split=0.2,  
+                                     callbacks = [early_stopping, lr])
+end = time.time() - st
+#4. evaluate , predict
+
+loss = model.evaluate(x_test,y_test, batch_size=1)
+print("걸린시간 : ", end)
+print("loss : ",loss[0])
+print("acc : ",loss[1])
+# 걸린시간 :  99.10525155067444
+# loss :  2.8433756828308105
+# acc :  0.5
+
+
