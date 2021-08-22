@@ -1,13 +1,13 @@
-from tensorflow.keras.applications import VGG19, Xception
+from tensorflow.keras.applications import VGG19, InceptionV3
 from tensorflow.keras.layers import Dense, Flatten,BatchNormalization, Activation, GlobalAveragePooling2D
 from tensorflow.keras.models import Sequential
 from keras.datasets import cifar10,cifar100
 from keras.applications.vgg19 import preprocess_input
 from keras.optimizers import Adam
 import numpy as np
-vgg16 = Xception(weights='imagenet', include_top=False,input_shape=(96,96,3))
+vgg16 = InceptionV3(weights='imagenet', include_top=False,input_shape=(96,96,3))
 vgg16.trainable = False
-(x_train, y_train), (x_test,y_test)= cifar10.load_data()
+(x_train, y_train), (x_test,y_test)= cifar100.load_data()
 
 # 데이터 전처리
 
@@ -19,7 +19,7 @@ y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout,LSTM,UpSampling2D
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout,LSTM, UpSampling2D
 model = Sequential()
 model.add(UpSampling2D(size=(3,3), input_shape=(32,32,3)))
 model.add(vgg16)
@@ -34,18 +34,18 @@ model.add(Activation('relu'))
 model.add(Dense(64))
 model.add(BatchNormalization())
 model.add(Activation('relu'))
-model.add(Dense(10, activation= 'softmax'))
-# model.summary()
+model.add(Dense(100, activation= 'softmax'))
+model.summary()
 
 
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint,ReduceLROnPlateau
-early_stopping = EarlyStopping(monitor='val_loss', patience= 5)
-lr = ReduceLROnPlateau(factor=0.01,verbose=1,patience=5)
+early_stopping = EarlyStopping(monitor='val_loss', patience= 20)
+lr = ReduceLROnPlateau(factor=0.01,verbose=1,patience=10)
 
 model.compile(loss = 'categorical_crossentropy', optimizer=Adam(1e-5), metrics=['acc'])
 import time 
 start_time = time.time()
-history =model.fit(x_train,y_train, epochs=10, batch_size=312, validation_split=0.2,  
+history =model.fit(x_train,y_train, epochs=100, batch_size=1024, validation_split=0.2,  
                                      callbacks = [early_stopping,lr])
 end = time.time() - start_time
 
@@ -56,22 +56,22 @@ print("acc : ",loss[1])
 
 # cifar10
 # trainable False
-# 걸린시간 :  110.55665993690491
-# loss :  1.9717763662338257
-# acc :  0.32359999418258667
+# 걸린시간 : 228.7369191646576
+# loss :  1.2717763662338257
+# acc :  0.10241000113248825
 
 # trainable True
-# 걸린시간 :  442.08923745155334
-# loss :  0.6347699165344238
-# acc :  0.8184999823570251
+# 걸린시간 :  397.6171078681946
+# loss :  2.3026676177978516
+# acc :  0.12314500149011612
 
 # cifar100
 # trainable False
-# 걸린시간 :  874.7901332378387
-# loss :  3.956064462661743
-# acc :  0.13359999656677246
+# 걸린시간 :  120.64321279525757
+# loss :  5.61240057373046875
+# acc : 0.008124969870359898
 
 # trainable True
-# 걸린시간 :  444.75471782684326
-# loss :  3.8019487857818604
-# acc :  0.22220000624656677
+# 걸린시간 :  521.8599574565887
+# loss :  4.625205059051514
+# acc :  0.009199999776482582

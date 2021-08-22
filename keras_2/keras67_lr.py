@@ -1,7 +1,7 @@
 input = 0.5
 goal_prediction=0.8 # 애 빼고 다 튜닝된다!
 weight = 0.5
-lr = 0.1
+lr = 0.01
 epoch = 300
 
 for iteration in range(epoch) :

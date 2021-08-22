@@ -46,14 +46,20 @@ y = np.array(y)
 #############################################################
 print("========================================")
 for index,value in enumerate(y):
-    if value == 3. :
-        y[index] = 4.
-    elif value == 5.:
-        y[index] = 6.
-    elif value == 7.:
-        y[index] = 6.
-    elif value == 9.:
-        y[index] = 8.        
+    if value == 9:
+        y[index] = 2
+    elif value == 8:
+        y[index] = 2
+    elif value == 7:
+        y[index] = 1
+    elif value == 6:
+        y[index] = 1
+    elif value == 5:
+        y[index] = 1
+    elif value == 4:
+        y[index] = 0
+    elif value == 3:
+        y[index] = 0 
 # print(pd.Series(y).value_counts())
 
 x_train, x_test, y_train, y_test = train_test_split(
@@ -87,15 +93,12 @@ print("smote 후 : ", x_smote_train.shape, y_smote_train.shape)
 print("smote 전 레이블 값 분포 : \n", pd.Series(y_train).value_counts())
 print("smote 후 레이블 값 분포 : \n", pd.Series(y_smote_train).value_counts())
 
-print("model_best_score_default :", score)
-print("model_best_score_smote   :", score2)
-print("f1_score_default:", f1)
-print("f1_score_smote  :", f12)
 
 model2 = XGBClassifier(n_jobs=-1)
 model2.fit(x_smote_train, y_smote_train, eval_metric='mlogloss')
 
-score = model2.score(x_test, y_test)
+score2 = model2.score(x_test, y_test)
 # print("model2.score : ", score)
-y_pred2 = model2.predict(x_test)
-f12 = f1_score(y_test, y_pred2, average='macro')
+y_pred = model2.predict(x_test)
+f1 = f1_score(y_test, y_pred, average='macro')
+print("f1_score :", f1)
