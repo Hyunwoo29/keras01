@@ -1,5 +1,11 @@
 # 실습
 # 카테고리컬 시그모이드 쓸것
+from tensorflow.keras.applications import VGG19, EfficientNetB0
+from tensorflow.keras.layers import Dense, Flatten,BatchNormalization, Activation, GlobalAveragePooling2D
+from tensorflow.keras.models import Sequential
+from keras.datasets import cifar10,cifar100
+from keras.applications.vgg19 import preprocess_input
+from keras.optimizers import Adam
 import numpy as np
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -49,18 +55,24 @@ print(y_train.shape) #(4000, 1)
 print(x_test.shape)  #(1000, 150, 150, 3)
 print(y_test.shape)  #(1000, 1)
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Flatten,  MaxPooling2D, Dropout
+vgg16 = VGG19(weights='imagenet', include_top=False,input_shape=(32,32,3))
 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout,LSTM, BatchNormalization, GlobalAveragePooling2D, Activation
 model = Sequential()
-model.add(Conv2D(162, (2,2), input_shape=(150, 150, 3)))
-model.add(MaxPooling2D(2,2))
-model.add(Dropout(0.2))
+model.add(vgg16)
+# model.add(Conv2D(filters=1024,kernel_size=(1,1),padding='valid')) # 미세조정(파인튜닝)
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(GlobalAveragePooling2D())
 model.add(Flatten())
-model.add(Dense(64, activation='relu'))
-model.add(Dense(32, activation='relu'))
-model.add(Dense(16, activation= 'relu'))
-model.add(Dense(1, activation='sigmoid'))
+model.add(Dense(128))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Dense(64))
+model.add(BatchNormalization())
+model.add(Activation('relu'))
+model.add(Dense(1, activation= 'sigmoid'))
 
 model.compile(loss = 'categorical_crossentropy', optimizer='adam', metrics=['acc'])
 from tensorflow.keras.callbacks import EarlyStopping
@@ -75,4 +87,8 @@ hist = model.fit(x_train, y_train, epochs=50, steps_per_epoch=32, # 160 / 5 = 32
 loss = model.evaluate(x_test, y_test)
 print('loss : ', loss[0])
 print('acc : ', loss[1])
-print('val_acc : ', loss[-1])
+
+
+# loss : 0.7471811495872641
+# acc : 0.8819291953356184
+
