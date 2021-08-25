@@ -28,14 +28,14 @@ x_test = x_test.reshape(10000,784).astype('float')/255
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Dense, Input, Dropout
 
-# def autoencoder(hidden_layer_size):
-#     model = Sequential()
-#     model.add(Dense(units=hidden_layer_size, input_shape=(784,),
-#                     activation='relu'))
-#     model.add(Dense(units=784, activation='sigmoid'))
-#     return model
+def autoencoder(hidden_layer_size):
+    model = Sequential()
+    model.add(Dense(units=hidden_layer_size, input_shape=(784,),
+                    activation='relu'))
+    model.add(Dense(units=784, activation='sigmoid'))
+    return model
 
-def autoencoder(hidden_layer_size) :
+def autoencoder2(hidden_layer_size) :
     model = Sequential()
     model.add(Dense(units=hidden_layer_size, input_shape=(784,),
                     activation= 'relu'))
@@ -53,12 +53,12 @@ model = autoencoder(hidden_layer_size=154) # pca 95%
 model.compile(optimizer='adam', loss='mse')
 model.fit(x_train, x_train, epochs=10)
 
-# model2 = autoencoder2(hidden_layer_size=154) # pca 95%
-# model2.compile(optimizer='adam', loss='mse')
-# model2.fit(x_train, x_train, epochs=10)
+model2 = autoencoder2(hidden_layer_size=154) # pca 95%
+model2.compile(optimizer='adam', loss='mse')
+model2.fit(x_train, x_train, epochs=10)
 
-# output = model.predict(x_test)
 output = model.predict(x_test)
+output_1 = model2.predict(x_test)
 
 
 
@@ -70,7 +70,7 @@ fig, ((ax1, ax2, ax3, ax4, ax5), (ax6, ax7, ax8, ax9, ax10), (ax11, ax12, ax13, 
 
 # 이미지 5개를 무작위로 고른다.
 random_images = random.sample(range(output.shape[0]), 5)
-# random_images_1 = random.sample(range(output.shape[0]), 5)
+random_images_1 = random.sample(range(output_1.shape[0]), 5)
 
 
 # 원본(입력) 이미지를 맨 위에 그린다
@@ -83,16 +83,16 @@ for i, ax in enumerate([ax1, ax2, ax3, ax4, ax5]):
     ax.set_yticks([])
 
 # 오토인코더가 출력한 이미지를 아래에 그린다.
-# for i, ax in enumerate([ax6, ax7, ax8, ax9, ax10]):
-#     ax.imshow(output[random_images[i]].reshape(28, 28), cmap = 'gray')
-#     if i == 0:
-#         ax.set_ylabel('OUTPUT', size = 20)
-#     ax.grid(False)
-#     ax.set_xticks([])
-#     ax.set_yticks([])
+for i, ax in enumerate([ax6, ax7, ax8, ax9, ax10]):
+    ax.imshow(output[random_images[i]].reshape(28, 28), cmap = 'gray')
+    if i == 0:
+        ax.set_ylabel('OUTPUT', size = 20)
+    ax.grid(False)
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 for i, ax in enumerate([ax11, ax12, ax13, ax14, ax15]):
-    ax.imshow(output[random_images[i]].reshape(28, 28), cmap = 'gray')
+    ax.imshow(output_1[random_images_1[i]].reshape(28, 28), cmap = 'gray')
     if i == 0:
         ax.set_ylabel('OUTPUT_1', size = 20)
     ax.grid(False)
